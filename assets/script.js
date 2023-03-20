@@ -23,6 +23,80 @@ $(function () {
 });
  */
 
+$(document).ready(function () {
+  // Display current day using moment.js
+  var currentDay = dayjs().format("dddd, MMMM Do YYYY");
+  $("#currentDay").text(currentDay);
+
+  // Define array of timeblocks for standard business hours
+  var workHours = [
+    { hour: "9AM", militaryHour: 9 },
+    { hour: "10AM", militaryHour: 10 },
+    { hour: "11AM", militaryHour: 11 },
+    { hour: "12PM", militaryHour: 12 },
+    { hour: "1PM", militaryHour: 13 },
+    { hour: "2PM", militaryHour: 14 },
+    { hour: "3PM", militaryHour: 15 },
+    { hour: "4PM", militaryHour: 16 },
+    { hour: "5PM", militaryHour: 17 },
+  ];
+
+  // Create timeblocks dynamically using jQuery
+  for (var i = 0; i < workHours.length; i++) {
+    var hour = workHours[i].hour;
+    var militaryHour = workHours[i].militaryHour;
+
+    // Create row for timeblock
+    var rowEl = $("<div>").addClass("row time-block");
+
+    // Create hour column
+    var hourEl = $("<div>")
+      .addClass("col-md-1 hour")
+      .text(hour)
+      .appendTo(rowEl);
+
+    // Create description column
+    var descriptionEl = $("<textarea>")
+      .addClass("col-md-10 description")
+      .attr("id", "description-" + militaryHour)
+      .appendTo(rowEl);
+
+    // Set class for description column based on current time
+    if (dayjs().hour() === militaryHour) {
+      descriptionEl.addClass("present");
+    } else if (dayjs().hour() > militaryHour) {
+      descriptionEl.addClass("past");
+    } else {
+      descriptionEl.addClass("future");
+    }
+
+    // Create save button column
+    var saveBtnEl = $("<button>")
+      $(this).addClass("col-md-1 saveBtn")
+      $(this).attr("id", "saveBtn-" + militaryHour)
+      $(this).html("<i class='fas fa-save'></i>")
+      $(this).appendTo(rowEl);
+
+    // Append row to container
+    $(".container").append(rowEl);
+  }
+
+  // Load saved events from local storage
+  for (var i = 0; i < workHours.length; i++) {
+    var militaryHour = workHours[i].militaryHour;
+    var savedEvent = localStorage.getItem("event-" + militaryHour);
+    $("#description-" + militaryHour).val(savedEvent);
+  }
+
+  // Save events to local storage on save button click
+  $(".saveBtn").on("click", function () {
+    var militaryHour = $(this).attr("id").split("-")[1];
+    var eventText = $("#description-" + militaryHour).val();
+    localStorage.setItem("event-" + militaryHour, eventText);
+  });
+});
+
+
 $(function () {
   // Get the current day and display it in the header
   $("#currentDay").text(dayjs().format("dddd, MMMM D"));
